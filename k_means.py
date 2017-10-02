@@ -24,41 +24,63 @@ x = x_data.values
 x = mms.fit_transform(x)
 x_data = pd.DataFrame(x, columns = ['petal length', 'petal width'])
 
-
 ###k-means###
-k = 5
-index_list = range(150)
-randPoints = x_data.values[random.sample(index_list, k)]    #To avoid selecting the same numbers
-tmpCentroid = np.array([[-1, -1], [-1, -1]])
-while (tmpCentroid.all != randPoints.all):
-    tmpCentroid = randPoints
-    #init array
-    dist_array = np.array([])
-    class_array = np.array([0]*150)
-
-    #for all points
-    for index in range(150):
-        #calculate distance from first centroid to a point
-        dist_array = np.append(dist_array, np.linalg.norm(x_data.values[index] - randPoints[0]))
-        #get the rest distance from other centroids to a point, and find min
-        for centroid in range(1, k):
-            if(np.linalg.norm(x_data.values[index] - randPoints[centroid]) < dist_array[index]):
-                dist_array[index] =  np.linalg.norm(x_data.values[index] - randPoints[centroid])
-                class_array[index] = centroid
-
-    #get centroid
-    sum_x = np.zeros([k, 2])    #init sum array
-    point_num = np.zeros([k, 1])    #init point_count array
-    #for all centroid
-    for centroid in range(0, k):
+def kMeans(k):
+    print('\nWhen k equals to :', k)
+    ##avoid selecting the same points##
+    index_list = range(150)
+    while(True):
+        isSame = False
+        randPoints = x_data.values[random.sample(index_list, k)]
+        for i in range(k):
+            for j in range(i+1, k):
+                if(np.array_equal(randPoints[i], randPoints[j])):
+                    print(randPoints[i], randPoints[j])
+                    isSame = True
+        if isSame == False:
+            break
+    ##avoid selecting the same points##
+    
+    tmpCentroid = np.array([[-1, -1]]*k)
+    while (not np.array_equal(tmpCentroid, randPoints)):
+        tmpCentroid = np.copy(randPoints)
+        #init array
+        dist_array = np.array([])
+        class_array = np.array([0]*150)
         #for all points
         for index in range(150):
-            if(class_array[index] == centroid):
-                sum_x[centroid] = sum_x[centroid] + x_data.values[index]
-                point_num[centroid] += 1
-        if point_num.all != 0:
+            #calculate distance from first centroid to a point
+            dist_array = np.append(dist_array, np.linalg.norm(x_data.values[index] - randPoints[0]))
+            #get the rest distance from other centroids to a point, and find min
+            for centroid in range(1, k):
+                if(np.linalg.norm(x_data.values[index] - randPoints[centroid]) < dist_array[index]):
+                    dist_array[index] =  np.linalg.norm(x_data.values[index] - randPoints[centroid])
+                    class_array[index] = centroid
+        #get new centroid
+        sum_x = np.zeros([k, 2])    #init sum array
+        point_num = np.zeros([k, 1])    #init point_count array
+        #for all centroid
+        for centroid in range(0, k):
+            #for all points
+            for index in range(150):
+                if(class_array[index] == centroid):
+                    sum_x[centroid] = sum_x[centroid] + x_data.values[index]
+                    point_num[centroid] += 1
             randPoints[centroid] = sum_x[centroid]/point_num[centroid]    #randPoints now become the new centroid
-    print(randPoints)
-aw = np.array([[0], [0]])
-bw = np.array([[0], [1]])
-print((aw==bw).any())
+    #plot
+    plt.axis([0, 1, 0, 1])
+    for index in range(150):
+        if class_array[index] == 0:
+            plt.plot(x_data.values[index, 0], x_data.values[index, 1], 'r.')
+        elif class_array[index] == 1:
+            plt.plot(x_data.values[index, 0], x_data.values[index, 1], 'g.')
+        elif class_array[index] == 2:
+            plt.plot(x_data.values[index, 0], x_data.values[index, 1], 'b.')
+        elif class_array[index] == 3:
+            plt.plot(x_data.values[index, 0], x_data.values[index, 1], 'y.')
+        elif class_array[index] == 4:
+            plt.plot(x_data.values[index, 0], x_data.values[index, 1], 'k.')
+    plt.show()
+##call k_means
+for iteration in range(2,6):
+    kMeans(iteration)
