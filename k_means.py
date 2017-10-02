@@ -17,7 +17,6 @@ data = data.drop(['sepal length', 'sepal width'], axis = 1)    #Drop unwanted fe
 x_data = data.drop('class', axis = 1)    #separate x from data
 y_data = data.drop(['petal length', 'petal width'], axis = 1)    #separate y from data
 
-
 ###normalize features###
 mms = preprocessing.MinMaxScaler()
 x = x_data.values
@@ -27,7 +26,8 @@ x_data = pd.DataFrame(x, columns = ['petal length', 'petal width'])
 ###k-means###
 def kMeans(k):
     print('\nWhen k equals to :', k)
-    ##avoid selecting the same points##
+    
+    ###################avoid selecting the same points(Step 2)###################
     index_list = range(150)
     while(True):
         isSame = False
@@ -39,14 +39,15 @@ def kMeans(k):
                     isSame = True
         if isSame == False:
             break
-    ##avoid selecting the same points##
+    ###################avoid selecting the same points(Step 2)###################
     
     tmpCentroid = np.array([[-1, -1]]*k)
     while (not np.array_equal(tmpCentroid, randPoints)):
-        tmpCentroid = np.copy(randPoints)
         #init array
+        tmpCentroid = np.copy(randPoints)
         dist_array = np.array([])
         class_array = np.array([0]*150)
+        ###################divide points(Step 3)###################
         #for all points
         for index in range(150):
             #calculate distance from first centroid to a point
@@ -56,7 +57,9 @@ def kMeans(k):
                 if(np.linalg.norm(x_data.values[index] - randPoints[centroid]) < dist_array[index]):
                     dist_array[index] =  np.linalg.norm(x_data.values[index] - randPoints[centroid])
                     class_array[index] = centroid
-        #get new centroid
+        ###################divide points(Step 3)###################
+        
+        ###################get new centroid(Step 4)###################
         sum_x = np.zeros([k, 2])    #init sum array
         point_num = np.zeros([k, 1])    #init point_count array
         #for all centroid
@@ -67,6 +70,8 @@ def kMeans(k):
                     sum_x[centroid] = sum_x[centroid] + x_data.values[index]
                     point_num[centroid] += 1
             randPoints[centroid] = sum_x[centroid]/point_num[centroid]    #randPoints now become the new centroid
+        ###################get new centroid(Step 4)###################
+        
     #plot
     plt.axis([0, 1, 0, 1])
     for index in range(150):
@@ -81,6 +86,7 @@ def kMeans(k):
         elif class_array[index] == 4:
             plt.plot(x_data.values[index, 0], x_data.values[index, 1], 'k.')
     plt.show()
-##call k_means
+
+###call k_means###
 for iteration in range(2,6):
     kMeans(iteration)
